@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/LenilsonTeixeira/books-api/database"
 	"github.com/LenilsonTeixeira/books-api/database/models"
@@ -62,7 +63,31 @@ func UpdateBook(c *gin.Context) {
 		})
 	}
 
-	err = db.Save(&book).Error
+	id := c.Param("id")
+
+	intId, err := strconv.Atoi(id)
+
+	if err != nil {
+		c.JSON(400, gin.H{"error": "ID has to be integer"})
+		return
+	}
+
+	var bookDatabase models.Book
+
+	err = db.First(&bookDatabase, intId).Error
+
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": "Cannot find book: " + err.Error(),
+		})
+		return
+	}
+
+	book.ID = uint(intId)
+	book.CreatedAt = bookDatabase.CreatedAt
+	book.UpdatedAt = time.Now()
+
+	err = db.Model(&bookDatabase).Where("ID = ?", c.Param("id")).Updates(&book).Error
 
 	if err != nil {
 		c.JSON(400, gin.H{
