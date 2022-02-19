@@ -1,0 +1,21 @@
+
+version: '3.7'
+services:
+  db:
+    image: postgres:13.3-alpine
+    container_name: books-db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "25432:5432"
+    environment:
+      POSTGRES_DB: books
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      PG_DATA: /var/lib/postgresql/data/webapi
+      POSTGRES_HOST: localhost
+    volumes:
+      - books-data:/var/lib/posgresql/data
+
+volumes:
+  books-data:
